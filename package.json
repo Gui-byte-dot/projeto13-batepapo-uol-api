@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Gui-byte-dot/projeto13-batepapo-uol-api#readme",
   "dependencies": {
+    "dayjs": "^1.11.6",
     "joi": "^17.7.0"
   }
 }
