@@ -25,6 +25,11 @@ try {
 const batepapoSchema = joi.object({
   name: joi.string().required(),
 })
+const batepapomsgSchema = joi.object({
+  to: joi.string().required(),
+  text: joi.string().required(),
+  type: joi.string().valid('message', 'private_message').required(),
+})
 
 app.post('/participants', async (req, res) => {
   const {name} = req.body;
@@ -74,38 +79,47 @@ app.get('/participants', async (req,res) => {
 
 
 
-// app.post('/messages', async (req,res) => {
-//   const from = req.headers.user;
-//   const {to, text, type} = req.body;
+app.post('/messages', async (req,res) => {
+  const from = req.headers.user;
+  const {to, text, type} = req.body;
 
-//   if(!from){
-//     res.sendStatus(401);
-//     return;
-//   }
-//   const validateParticipant = batepapoSchema.validate(req.body, {abortEarly : false})
-//   if(validateParticipant.error){
-//     const errors = validateParticipant.error.details.map((detail) => detail.message);
-//     res.status(422).send(errors)
-//     return 
-//   }
+  if(!from){
+    res.sendStatus(401);
+    return;
+  }
+  const validateParticipant = batepapomsgSchema.validate(req.body, {abortEarly : false})
+  if(validateParticipant.error){
+    const errors = validateParticipant.error.details.map((detail) => detail.message);
+    res.status(422).send(errors)
+    return 
+  }
 
-//   try{
-//     const typeMessage = await db.collection('messages').findOne({type:'message'})
-//     const typePrivate = await db.collection('messages').findOne({type:'private_message'})
-//     if(!typeMessage && !typePrivate){
-//       return res.sendStatus(422)
-//     }
-//     await db.collection('message').insertOne({
-//       to,
-//       text,
-//       type
-//     });
-//     res.sendStatus(201);
-//   } catch(err) {
-//     res.sendStatus(err);
-//   }
+  try{
+    await db.collection('message').insertOne({
+      from,
+      to,
+      text,
+      type
+    });
+    res.sendStatus(201);
+  } catch(err) {
+    res.sendStatus(err);
+  }
 
-// })
+})
+
+app.get('/messages', async (req,res) => {
+  const limit = parseInt(req.query.limit);
+  const from = req.headers.user;
+
+  try{
+    let messages = await db.collection('message').find().toArray();
+    let msgfiltered = (messages.filter((message) => message.from === from))
+    res.send(msgfiltered.slice(msgfiltered.length - limit, msgfiltered.length));
+  } catch(error) {
+    res.sendStatus(500);
+  }
+})
 
 app.listen(5000, ()=> console.log("Rodando na porta 5000"));
 
