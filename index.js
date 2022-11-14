@@ -58,6 +58,7 @@ app.post('/participants', async (req, res) => {
       type: 'status', 
       time: dayjs().format("HH:mm:ss")
     });
+
     res.sendStatus(201);
 
   } catch(err) {
@@ -69,7 +70,7 @@ app.post('/participants', async (req, res) => {
 
 app.get('/participants', async (req,res) => {
   try{
-    const participants = await db.collection('participants').find().toArray();
+    let participants = await db.collection('participants').find().toArray();
     res.send(participants);
   } catch(error) {
     res.sendStatus(500)
@@ -121,5 +122,48 @@ app.get('/messages', async (req,res) => {
   }
 })
 
-app.listen(5000, ()=> console.log("Rodando na porta 5000"));
+app.post('/status', async (req,res) => {
+  const usuario = req.headers.user;
+  console.log(usuario);
+  
 
+  try{
+   
+    let oneparticipant = await db.collection('participants').findOne({name:usuario})
+
+    if(!oneparticipant){
+      res.status(404).send("Usuário não encontrado!");
+      return;
+    }
+    
+    await db.collection('participants').updateOne({name: usuario}, {$set: {lastStatus:Date.now()}});
+    res.sendStatus(200);
+    } catch(error) {
+    res.send(error);
+  }
+ 
+  // db.student.updateOne({name: "Annu"}, {$set:{age:25}})
+
+
+
+})
+// let filterDelete = await db.collection('participants').find({name: {$exists:true}}).toArray();
+// let filter1 = filterDelete.filter((last) => Date.now() - last.lastStatus < 3600000)
+// console.log(filter1)
+setInterval(function(){
+  db.collection('participants').deleteMany({lastStatus: {"$lt":Date.now() - 3600000}})
+},25000)
+let filter = await db.collection('participants').find().toArray();
+console.log(filter)
+
+// let filterDelete = db.collection('participants').find({ name: {$exists: true} });
+
+// let filter1 = filterDelete.filter((filt,index) => filt.name === "Vasco")
+// console.log(filter1[0].name.length)
+app.listen(5000, ()=> console.log("Rodando na porta 5000"));
+// db.products.find({"things.bottle":{"$exists":true}})
+
+// db.orders.deleteMany( { "stock" : "Brent Crude Futures", "limit" : { $gt : 48.88 } } );
+// db.inventory.find( { quantity: { $lt: 20 } } )
+
+// db.myCollection.deleteMany({modifiedOn : {"$lt" : new Date(2021, 12, 20}})
