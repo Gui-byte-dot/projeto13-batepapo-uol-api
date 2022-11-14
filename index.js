@@ -145,14 +145,16 @@ app.post('/status', async (req, res) => {
     res.send(error);
   }
 
-  // db.student.updateOne({name: "Annu"}, {$set:{age:25}})
-
-
-
 })
 
-
-// const sim =  await db.collection("message").find({_id: ObjectId(id)});
+setInterval(async () => {
+  try {
+    db.collection('participants').deleteMany({ text: 'entra na sala...' });
+    db.collection('participants').deleteMany({ lastStatus: { "$lt": Date.now() - 10000 } });
+  } catch (err) {
+    console.log(err)
+  }
+}, 15000)
     
 app.delete('/messages/:id', async (req, res) => {
   const {id} = req.params;
@@ -206,41 +208,6 @@ app.put('/messages/:id', async (req, res) => {
 }});
 
 
-
-// db.restaurant.updateOne(
-//   { "name" : "Central Perk Cafe" },
-//   { $set: { "violations" : 3 } }
-// );
-
-// let filterDelete = await db.collection('participants').find({name: {$exists:true}}).toArray();
-// let filter1 = filterDelete.filter((last) => Date.now() - last.lastStatus < 3600000)
-// console.log(filter1)
-
-
-// setInterval(async function () {
-//   try {
-//     // let allParticipants = await db.collection('participants').find().toArray();
-//     db.collection('participants').deleteMany({ text: 'entra na sala...' });
-//     db.collection('participants').deleteMany({ lastStatus: { "$lt": Date.now() - 10000 } });
-//   } catch (err) {
-//     console.log(err)
-//   }
-// }, 15000)
-
-// let filter = await db.collection('participants').find().toArray();
-// console.log(filter)
-
-
-// let filterDelete = db.collection('participants').find({ name: {$exists: true} });
-
-// let filter1 = filterDelete.filter((filt,index) => filt.name === "Vasco")
-// console.log(filter1[0].name.length)
 app.listen(5000, () => console.log("Rodando na porta 5000"));
-// db.products.find({"things.bottle":{"$exists":true}})
 
-// db.orders.deleteMany( { "stock" : "Brent Crude Futures", "limit" : { $gt : 48.88 } } );
-// db.inventory.find( { quantity: { $lt: 20 } } )
-
-// db.myCollection.deleteMany({modifiedOn : {"$lt" : new Date(2021, 12, 20}})
-// {from: 'xxx', to: 'Todos', text: 'sai da sala...', type: 'status', time: 'HH:MM:SS'}
 
